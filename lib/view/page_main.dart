@@ -20,10 +20,11 @@ class PageMain extends StatefulWidget {
 class _PageMainState extends State<PageMain> {
   RefreshController _refreshCon = RefreshController();
   var _pageLoading = true;
-  var _curLocation = '';
+  var _curLocation = '', _latitude = '', _longitude = '';
+  var _appBarHeight = 0.0, _statusBarHeight = 0.0;
 
-  final ApiService _apiService = new ApiService();
-  List<Hasil> listHasil = new List();
+  final ApiService _apiService = ApiService();
+  List<Hasil> listHasil = List();
 
   @override
   void initState() {
@@ -38,7 +39,6 @@ class _PageMainState extends State<PageMain> {
         url: ApiUrl.surat,
         headers: {},
         callback: (status, message, response) {
-          debugPrint('load');
           setState(() {
             _refreshCon.refreshCompleted();
             _pageLoading = false;
@@ -47,8 +47,6 @@ class _PageMainState extends State<PageMain> {
             if (status) {
               ResponseSurat resSurat = ResponseSurat.fromJson(response);
               listHasil = resSurat.hasil;
-            } else {
-              debugPrint('pageMain Gagal: $status, $message, $response');
             }
           });
           return;
@@ -61,16 +59,13 @@ class _PageMainState extends State<PageMain> {
       geolocator
           .getCurrentPosition(desiredAccuracy: LocationAccuracy.best)
           .then((value) async {
-        debugPrint('pageMai: ' +
-            value.latitude.toString() +
-            ', ' +
-            value.longitude.toString());
+        _latitude = value.latitude.toString();
+        _longitude = value.longitude.toString();
         List<Placemark> daftarPlace = await geolocator.placemarkFromCoordinates(
             value.latitude, value.longitude);
         Placemark place = daftarPlace[0];
         setState(() {
           _curLocation = place.locality;
-          debugPrint('pagemain: $_curLocation');
         });
       }).catchError((e) {
         debugPrint('error e: $e');
@@ -82,56 +77,58 @@ class _PageMainState extends State<PageMain> {
 
   @override
   Widget build(BuildContext context) {
+    _statusBarHeight = MediaQuery.of(context).padding.top;
+    _appBarHeight = AppBar().preferredSize.height;
+
     return MaterialApp(
       home: Scaffold(
-        body: ScrollConfiguration(
-          behavior: RemoveGlow(),
-          child: NestedScrollView(
-            headerSliverBuilder: (context, scrolling) {
-              return <Widget>[
-                SliverAppBar(
-                  title: Container(
-                    height: 200,
+          body: NestedScrollView(
+        headerSliverBuilder: (context, scrolling) {
+          return <Widget>[
+            SliverOverlapAbsorber(
+              handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context),
+              sliver: SliverAppBar(
+                backgroundColor: Colors.green,
+                pinned: true,
+                expandedHeight: 160,
+                forceElevated: scrolling,
+                flexibleSpace: FlexibleSpaceBar(
+                  background: Container(
+                    padding:
+                        EdgeInsets.only(top: _appBarHeight + _statusBarHeight),
+                    color: Colors.red,
+                  ),
+                ),
+              ),
+            ),
+          ];
+        },
+        body: Container(
+          margin: EdgeInsets.only(top: _appBarHeight),
+          child: Stack(
+            children: [
+              Center(
+                child: Visibility(
+                  visible: _pageLoading,
+                  child: JumpingDotsProgressIndicator(
+                    fontSize: Size.size40,
                     color: Colors.blue,
                   ),
-                  actions: [
-                    IconButton(
-                        icon: Icon(Icons.settings),
-                        onPressed: () =>
-                            Navigator.of(context).push(MaterialPageRoute(
-                                builder: (_) => PageShalat(
-                                      location: _curLocation,
-                                    ))))
-                  ],
-                )
-              ];
-            },
-            body: Stack(
-              children: [
-                Center(
-                  child: Visibility(
-                    visible: _pageLoading,
-                    child: JumpingDotsProgressIndicator(
-                      fontSize: Size.size40,
-                      color: Colors.blue,
-                    ),
-                  ),
                 ),
-                SmartRefresher(
-                  controller: _refreshCon,
-                  enablePullUp: true,
-                  onRefresh: _getData,
-                  child: ListView.builder(
-                    itemCount: listHasil.length,
-                    itemBuilder: (context, index) =>
-                        itemSurat(listHasil, index),
-                  ),
+              ),
+              SmartRefresher(
+                controller: _refreshCon,
+                enablePullUp: true,
+                onRefresh: _getData,
+                child: ListView.builder(
+                  itemCount: listHasil.length,
+                  itemBuilder: (context, index) => itemSurat(listHasil, index),
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
-      ),
+      )),
     );
   }
 

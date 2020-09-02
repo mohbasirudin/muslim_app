@@ -1,3 +1,7 @@
+// To parse this JSON data, do
+//
+//     final responseShalat = responseShalatFromJson(jsonString);
+
 import 'dart:convert';
 
 ResponseShalat responseShalatFromJson(String str) => ResponseShalat.fromJson(json.decode(str));
@@ -8,478 +12,233 @@ class ResponseShalat {
     ResponseShalat({
         this.code,
         this.status,
-        this.data,
+        this.results,
     });
 
     int code;
     String status;
-    List<Datum> data;
+    Results results;
 
     factory ResponseShalat.fromJson(Map<String, dynamic> json) => ResponseShalat(
         code: json["code"],
         status: json["status"],
-        data: List<Datum>.from(json["data"].map((x) => Datum.fromJson(x))),
+        results: Results.fromJson(json["results"]),
     );
 
     Map<String, dynamic> toJson() => {
         "code": code,
         "status": status,
-        "data": List<dynamic>.from(data.map((x) => x.toJson())),
+        "results": results.toJson(),
     };
 }
 
-class Datum {
-    Datum({
-        this.timings,
-        this.date,
-        this.meta,
+class Results {
+    Results({
+        this.datetime,
+        this.location,
+        this.settings,
     });
 
-    Timings timings;
-    Date date;
-    Meta meta;
+    List<Datetime> datetime;
+    Location location;
+    Settings settings;
 
-    factory Datum.fromJson(Map<String, dynamic> json) => Datum(
-        timings: Timings.fromJson(json["timings"]),
-        date: Date.fromJson(json["date"]),
-        meta: Meta.fromJson(json["meta"]),
+    factory Results.fromJson(Map<String, dynamic> json) => Results(
+        datetime: List<Datetime>.from(json["datetime"].map((x) => Datetime.fromJson(x))),
+        location: Location.fromJson(json["location"]),
+        settings: Settings.fromJson(json["settings"]),
     );
 
     Map<String, dynamic> toJson() => {
-        "timings": timings.toJson(),
+        "datetime": List<dynamic>.from(datetime.map((x) => x.toJson())),
+        "location": location.toJson(),
+        "settings": settings.toJson(),
+    };
+}
+
+class Datetime {
+    Datetime({
+        this.times,
+        this.date,
+    });
+
+    Times times;
+    Date date;
+
+    factory Datetime.fromJson(Map<String, dynamic> json) => Datetime(
+        times: Times.fromJson(json["times"]),
+        date: Date.fromJson(json["date"]),
+    );
+
+    Map<String, dynamic> toJson() => {
+        "times": times.toJson(),
         "date": date.toJson(),
-        "meta": meta.toJson(),
     };
 }
 
 class Date {
     Date({
-        this.readable,
         this.timestamp,
         this.gregorian,
         this.hijri,
     });
 
-    String readable;
-    String timestamp;
-    Gregorian gregorian;
-    Hijri hijri;
+    int timestamp;
+    DateTime gregorian;
+    DateTime hijri;
 
     factory Date.fromJson(Map<String, dynamic> json) => Date(
-        readable: json["readable"],
         timestamp: json["timestamp"],
-        gregorian: Gregorian.fromJson(json["gregorian"]),
-        hijri: Hijri.fromJson(json["hijri"]),
+        gregorian: DateTime.parse(json["gregorian"]),
+        hijri: DateTime.parse(json["hijri"]),
     );
 
     Map<String, dynamic> toJson() => {
-        "readable": readable,
         "timestamp": timestamp,
-        "gregorian": gregorian.toJson(),
-        "hijri": hijri.toJson(),
+        "gregorian": "${gregorian.year.toString().padLeft(4, '0')}-${gregorian.month.toString().padLeft(2, '0')}-${gregorian.day.toString().padLeft(2, '0')}",
+        "hijri": "${hijri.year.toString().padLeft(4, '0')}-${hijri.month.toString().padLeft(2, '0')}-${hijri.day.toString().padLeft(2, '0')}",
     };
 }
 
-class Gregorian {
-    Gregorian({
-        this.date,
-        this.format,
-        this.day,
-        this.weekday,
-        this.month,
-        this.year,
-        this.designation,
-    });
-
-    String date;
-    Format format;
-    String day;
-    GregorianWeekday weekday;
-    GregorianMonth month;
-    String year;
-    Designation designation;
-
-    factory Gregorian.fromJson(Map<String, dynamic> json) => Gregorian(
-        date: json["date"],
-        format: formatValues.map[json["format"]],
-        day: json["day"],
-        weekday: GregorianWeekday.fromJson(json["weekday"]),
-        month: GregorianMonth.fromJson(json["month"]),
-        year: json["year"],
-        designation: Designation.fromJson(json["designation"]),
-    );
-
-    Map<String, dynamic> toJson() => {
-        "date": date,
-        "format": formatValues.reverse[format],
-        "day": day,
-        "weekday": weekday.toJson(),
-        "month": month.toJson(),
-        "year": year,
-        "designation": designation.toJson(),
-    };
-}
-
-class Designation {
-    Designation({
-        this.abbreviated,
-        this.expanded,
-    });
-
-    Abbreviated abbreviated;
-    Expanded expanded;
-
-    factory Designation.fromJson(Map<String, dynamic> json) => Designation(
-        abbreviated: abbreviatedValues.map[json["abbreviated"]],
-        expanded: expandedValues.map[json["expanded"]],
-    );
-
-    Map<String, dynamic> toJson() => {
-        "abbreviated": abbreviatedValues.reverse[abbreviated],
-        "expanded": expandedValues.reverse[expanded],
-    };
-}
-
-enum Abbreviated { AD, AH }
-
-final abbreviatedValues = EnumValues({
-    "AD": Abbreviated.AD,
-    "AH": Abbreviated.AH
-});
-
-enum Expanded { ANNO_DOMINI, ANNO_HEGIRAE }
-
-final expandedValues = EnumValues({
-    "Anno Domini": Expanded.ANNO_DOMINI,
-    "Anno Hegirae": Expanded.ANNO_HEGIRAE
-});
-
-enum Format { DD_MM_YYYY }
-
-final formatValues = EnumValues({
-    "DD-MM-YYYY": Format.DD_MM_YYYY
-});
-
-class GregorianMonth {
-    GregorianMonth({
-        this.number,
-        this.en,
-    });
-
-    int number;
-    PurpleEn en;
-
-    factory GregorianMonth.fromJson(Map<String, dynamic> json) => GregorianMonth(
-        number: json["number"],
-        en: purpleEnValues.map[json["en"]],
-    );
-
-    Map<String, dynamic> toJson() => {
-        "number": number,
-        "en": purpleEnValues.reverse[en],
-    };
-}
-
-enum PurpleEn { AUGUST }
-
-final purpleEnValues = EnumValues({
-    "August": PurpleEn.AUGUST
-});
-
-class GregorianWeekday {
-    GregorianWeekday({
-        this.en,
-    });
-
-    String en;
-
-    factory GregorianWeekday.fromJson(Map<String, dynamic> json) => GregorianWeekday(
-        en: json["en"],
-    );
-
-    Map<String, dynamic> toJson() => {
-        "en": en,
-    };
-}
-
-class Hijri {
-    Hijri({
-        this.date,
-        this.format,
-        this.day,
-        this.weekday,
-        this.month,
-        this.year,
-        this.designation,
-        this.holidays,
-    });
-
-    String date;
-    Format format;
-    String day;
-    HijriWeekday weekday;
-    HijriMonth month;
-    String year;
-    Designation designation;
-    List<String> holidays;
-
-    factory Hijri.fromJson(Map<String, dynamic> json) => Hijri(
-        date: json["date"],
-        format: formatValues.map[json["format"]],
-        day: json["day"],
-        weekday: HijriWeekday.fromJson(json["weekday"]),
-        month: HijriMonth.fromJson(json["month"]),
-        year: json["year"],
-        designation: Designation.fromJson(json["designation"]),
-        holidays: List<String>.from(json["holidays"].map((x) => x)),
-    );
-
-    Map<String, dynamic> toJson() => {
-        "date": date,
-        "format": formatValues.reverse[format],
-        "day": day,
-        "weekday": weekday.toJson(),
-        "month": month.toJson(),
-        "year": year,
-        "designation": designation.toJson(),
-        "holidays": List<dynamic>.from(holidays.map((x) => x)),
-    };
-}
-
-class HijriMonth {
-    HijriMonth({
-        this.number,
-        this.en,
-        this.ar,
-    });
-
-    int number;
-    FluffyEn en;
-    Ar ar;
-
-    factory HijriMonth.fromJson(Map<String, dynamic> json) => HijriMonth(
-        number: json["number"],
-        en: fluffyEnValues.map[json["en"]],
-        ar: arValues.map[json["ar"]],
-    );
-
-    Map<String, dynamic> toJson() => {
-        "number": number,
-        "en": fluffyEnValues.reverse[en],
-        "ar": arValues.reverse[ar],
-    };
-}
-
-enum Ar { EMPTY, AR }
-
-final arValues = EnumValues({
-    "مُحَرَّم": Ar.AR,
-    "ذوالحجة": Ar.EMPTY
-});
-
-enum FluffyEn { DH_AL_IJJAH, MUARRAM }
-
-final fluffyEnValues = EnumValues({
-    "Dhū al-Ḥijjah": FluffyEn.DH_AL_IJJAH,
-    "Muḥarram": FluffyEn.MUARRAM
-});
-
-class HijriWeekday {
-    HijriWeekday({
-        this.en,
-        this.ar,
-    });
-
-    String en;
-    String ar;
-
-    factory HijriWeekday.fromJson(Map<String, dynamic> json) => HijriWeekday(
-        en: json["en"],
-        ar: json["ar"],
-    );
-
-    Map<String, dynamic> toJson() => {
-        "en": en,
-        "ar": ar,
-    };
-}
-
-class Meta {
-    Meta({
-        this.latitude,
-        this.longitude,
-        this.timezone,
-        this.method,
-        this.latitudeAdjustmentMethod,
-        this.midnightMode,
-        this.school,
-        this.offset,
-    });
-
-    double latitude;
-    double longitude;
-    Timezone timezone;
-    Method method;
-    LatitudeAdjustmentMethod latitudeAdjustmentMethod;
-    MidnightMode midnightMode;
-    MidnightMode school;
-    Map<String, int> offset;
-
-    factory Meta.fromJson(Map<String, dynamic> json) => Meta(
-        latitude: json["latitude"].toDouble(),
-        longitude: json["longitude"].toDouble(),
-        timezone: timezoneValues.map[json["timezone"]],
-        method: Method.fromJson(json["method"]),
-        latitudeAdjustmentMethod: latitudeAdjustmentMethodValues.map[json["latitudeAdjustmentMethod"]],
-        midnightMode: midnightModeValues.map[json["midnightMode"]],
-        school: midnightModeValues.map[json["school"]],
-        offset: Map.from(json["offset"]).map((k, v) => MapEntry<String, int>(k, v)),
-    );
-
-    Map<String, dynamic> toJson() => {
-        "latitude": latitude,
-        "longitude": longitude,
-        "timezone": timezoneValues.reverse[timezone],
-        "method": method.toJson(),
-        "latitudeAdjustmentMethod": latitudeAdjustmentMethodValues.reverse[latitudeAdjustmentMethod],
-        "midnightMode": midnightModeValues.reverse[midnightMode],
-        "school": midnightModeValues.reverse[school],
-        "offset": Map.from(offset).map((k, v) => MapEntry<String, dynamic>(k, v)),
-    };
-}
-
-enum LatitudeAdjustmentMethod { ANGLE_BASED }
-
-final latitudeAdjustmentMethodValues = EnumValues({
-    "ANGLE_BASED": LatitudeAdjustmentMethod.ANGLE_BASED
-});
-
-class Method {
-    Method({
-        this.id,
-        this.name,
-        this.params,
-    });
-
-    int id;
-    Name name;
-    Params params;
-
-    factory Method.fromJson(Map<String, dynamic> json) => Method(
-        id: json["id"],
-        name: nameValues.map[json["name"]],
-        params: Params.fromJson(json["params"]),
-    );
-
-    Map<String, dynamic> toJson() => {
-        "id": id,
-        "name": nameValues.reverse[name],
-        "params": params.toJson(),
-    };
-}
-
-enum Name { ISLAMIC_SOCIETY_OF_NORTH_AMERICA_ISNA }
-
-final nameValues = EnumValues({
-    "Islamic Society of North America (ISNA)": Name.ISLAMIC_SOCIETY_OF_NORTH_AMERICA_ISNA
-});
-
-class Params {
-    Params({
-        this.fajr,
-        this.isha,
-    });
-
-    int fajr;
-    int isha;
-
-    factory Params.fromJson(Map<String, dynamic> json) => Params(
-        fajr: json["Fajr"],
-        isha: json["Isha"],
-    );
-
-    Map<String, dynamic> toJson() => {
-        "Fajr": fajr,
-        "Isha": isha,
-    };
-}
-
-enum MidnightMode { STANDARD }
-
-final midnightModeValues = EnumValues({
-    "STANDARD": MidnightMode.STANDARD
-});
-
-enum Timezone { ASIA_JAKARTA }
-
-final timezoneValues = EnumValues({
-    "Asia/Jakarta": Timezone.ASIA_JAKARTA
-});
-
-class Timings {
-    Timings({
-        this.fajr,
+class Times {
+    Times({
+        this.imsak,
         this.sunrise,
+        this.fajr,
         this.dhuhr,
         this.asr,
         this.sunset,
         this.maghrib,
         this.isha,
-        this.imsak,
         this.midnight,
     });
 
+    String imsak;
+    Midnight sunrise;
     String fajr;
-    String sunrise;
     String dhuhr;
     String asr;
-    Maghrib sunset;
+    Midnight sunset;
     Maghrib maghrib;
-    Isha isha;
-    String imsak;
-    String midnight;
+    String isha;
+    Midnight midnight;
 
-    factory Timings.fromJson(Map<String, dynamic> json) => Timings(
+    factory Times.fromJson(Map<String, dynamic> json) => Times(
+        imsak: json["Imsak"],
+        sunrise: midnightValues.map[json["Sunrise"]],
         fajr: json["Fajr"],
-        sunrise: json["Sunrise"],
         dhuhr: json["Dhuhr"],
         asr: json["Asr"],
-        sunset: maghribValues.map[json["Sunset"]],
+        sunset: midnightValues.map[json["Sunset"]],
         maghrib: maghribValues.map[json["Maghrib"]],
-        isha: ishaValues.map[json["Isha"]],
-        imsak: json["Imsak"],
-        midnight: json["Midnight"],
+        isha: json["Isha"],
+        midnight: midnightValues.map[json["Midnight"]],
     );
 
     Map<String, dynamic> toJson() => {
+        "Imsak": imsak,
+        "Sunrise": midnightValues.reverse[sunrise],
         "Fajr": fajr,
-        "Sunrise": sunrise,
         "Dhuhr": dhuhr,
         "Asr": asr,
-        "Sunset": maghribValues.reverse[sunset],
+        "Sunset": midnightValues.reverse[sunset],
         "Maghrib": maghribValues.reverse[maghrib],
-        "Isha": ishaValues.reverse[isha],
-        "Imsak": imsak,
-        "Midnight": midnight,
+        "Isha": isha,
+        "Midnight": midnightValues.reverse[midnight],
     };
 }
 
-enum Isha { THE_1829_WIB, THE_1828_WIB, THE_1827_WIB, THE_1826_WIB }
-
-final ishaValues = EnumValues({
-    "18:26 (WIB)": Isha.THE_1826_WIB,
-    "18:27 (WIB)": Isha.THE_1827_WIB,
-    "18:28 (WIB)": Isha.THE_1828_WIB,
-    "18:29 (WIB)": Isha.THE_1829_WIB
-});
-
-enum Maghrib { THE_1730_WIB, THE_1729_WIB, THE_1728_WIB }
+enum Maghrib { THE_1741, THE_1740, THE_1739, THE_1738, THE_1737 }
 
 final maghribValues = EnumValues({
-    "17:28 (WIB)": Maghrib.THE_1728_WIB,
-    "17:29 (WIB)": Maghrib.THE_1729_WIB,
-    "17:30 (WIB)": Maghrib.THE_1730_WIB
+    "17:37": Maghrib.THE_1737,
+    "17:38": Maghrib.THE_1738,
+    "17:39": Maghrib.THE_1739,
+    "17:40": Maghrib.THE_1740,
+    "17:41": Maghrib.THE_1741
 });
+
+enum Midnight { EMPTY }
+
+final midnightValues = EnumValues({
+    "-": Midnight.EMPTY
+});
+
+class Location {
+    Location({
+        this.latitude,
+        this.longitude,
+        this.elevation,
+        this.country,
+        this.countryCode,
+        this.timezone,
+        this.localOffset,
+    });
+
+    double latitude;
+    double longitude;
+    int elevation;
+    String country;
+    String countryCode;
+    String timezone;
+    int localOffset;
+
+    factory Location.fromJson(Map<String, dynamic> json) => Location(
+        latitude: json["latitude"].toDouble(),
+        longitude: json["longitude"].toDouble(),
+        elevation: json["elevation"],
+        country: json["country"],
+        countryCode: json["country_code"],
+        timezone: json["timezone"],
+        localOffset: json["local_offset"],
+    );
+
+    Map<String, dynamic> toJson() => {
+        "latitude": latitude,
+        "longitude": longitude,
+        "elevation": elevation,
+        "country": country,
+        "country_code": countryCode,
+        "timezone": timezone,
+        "local_offset": localOffset,
+    };
+}
+
+class Settings {
+    Settings({
+        this.timeformat,
+        this.school,
+        this.juristic,
+        this.highlat,
+        this.fajrAngle,
+        this.ishaAngle,
+    });
+
+    String timeformat;
+    String school;
+    String juristic;
+    String highlat;
+    int fajrAngle;
+    int ishaAngle;
+
+    factory Settings.fromJson(Map<String, dynamic> json) => Settings(
+        timeformat: json["timeformat"],
+        school: json["school"],
+        juristic: json["juristic"],
+        highlat: json["highlat"],
+        fajrAngle: json["fajr_angle"],
+        ishaAngle: json["isha_angle"],
+    );
+
+    Map<String, dynamic> toJson() => {
+        "timeformat": timeformat,
+        "school": school,
+        "juristic": juristic,
+        "highlat": highlat,
+        "fajr_angle": fajrAngle,
+        "isha_angle": ishaAngle,
+    };
+}
 
 class EnumValues<T> {
     Map<String, T> map;

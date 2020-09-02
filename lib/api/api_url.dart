@@ -1,16 +1,19 @@
-import 'package:quran/model/shalat/response_shalat.dart';
-
 class ApiUrl {
   static const baseUrl = 'https://api.banghasan.com';
   static const surat = '$baseUrl/quran/format/json/surat';
-  static const apiAladhan = 'http://api.aladhan.com/v1/calendar';
+  static const methodToday = 'today';
+  static const methodWeek = 'this_week';
+  static const methodMonth = 'this_month';
 
   static Future<String> ayatRange(var nomor, var start, var end) async {
     return '$baseUrl/quran/format/json/surat/$nomor/ayat/$start-$end';
   }
 
   static Future<String> jadwalShalat(
-      var latitude, var longitude, var method, var month, var year) async {
-    return '$apiAladhan?latitude=$latitude&longitude=$longitude&method=$method&month=$month&year=$year';
+    var method,
+    var latitude,
+    var longitude,
+  ) async {
+    return 'https://api.pray.zone/v2/times/$method.json?longitude=$longitude&latitude=$latitude';
   }
 }
