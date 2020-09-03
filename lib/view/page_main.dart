@@ -8,6 +8,8 @@ import 'package:quran/baseurl/base_style.dart';
 import 'package:quran/helper/remove_glow.dart';
 import 'package:quran/model/quran/response_surat.dart';
 import 'package:quran/baseurl/base_app.dart';
+import 'package:quran/model/shalat/response_shalat.dart' as shalat;
+import 'package:quran/view/other/custom_dialog.dart';
 import 'package:quran/view/quran/paget_ayat.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:quran/view/shalat/page_shalat.dart';
@@ -19,9 +21,20 @@ class PageMain extends StatefulWidget {
 
 class _PageMainState extends State<PageMain> {
   RefreshController _refreshCon = RefreshController();
-  var _pageLoading = true;
-  var _curLocation = '', _latitude = '', _longitude = '';
+  var _vTime = false, _pageLoading = true;
+  var _curLocation = '',
+      _latitude = '',
+      _longitude = '',
+      _curShalat = '',
+      _curTimeShalat = '00:00',
+      _curCity = '';
   var _appBarHeight = 0.0, _statusBarHeight = 0.0;
+  var _shubuh = 0,
+      _dhuhur = 0,
+      _ashar = 0,
+      _maghrib = 0,
+      _isya = 0,
+      _curTime = 0;
 
   final ApiService _apiService = ApiService();
   List<Hasil> listHasil = List();
@@ -31,6 +44,53 @@ class _PageMainState extends State<PageMain> {
     _getCurrenyLocation();
     _getData();
     super.initState();
+  }
+
+  Future _getShalat() async {
+    var urlShalat = '';
+    await ApiUrl.jadwalShalat(ApiUrl.methodToday, _latitude, _longitude)
+        .then((value) => urlShalat = value);
+    _apiService.get(
+        url: urlShalat,
+        headers: {},
+        callback: (status, message, response) {
+          try {
+            setState(() {
+              if (status) {
+                shalat.ResponseShalat resShalat =
+                    shalat.ResponseShalat.fromJson(response);
+                List<shalat.Datetime> listDatetime = resShalat.results.datetime;
+                _curTime = Func.timeToInt(Func.getTime(Format.time_3));
+                _shubuh = Func.timeToInt(listDatetime[0].times.fajr);
+                _dhuhur = Func.timeToInt(listDatetime[0].times.dhuhr);
+                _ashar = Func.timeToInt(listDatetime[0].times.asr);
+                _maghrib = Func.timeToInt(listDatetime[0].times.maghrib);
+                _isya = Func.timeToInt(listDatetime[0].times.isha);
+
+                if (_curTime >= _shubuh && _curTime < _dhuhur) {
+                  _curShalat = Time.dhuhur;
+                  _curTimeShalat = listDatetime[0].times.dhuhr;
+                } else if (_curTime >= _dhuhur && _curTime < _ashar) {
+                  _curShalat = Time.ashar;
+                  _curTimeShalat = listDatetime[0].times.asr;
+                } else if (_curTime >= _ashar && _curTime < _maghrib) {
+                  _curShalat = Time.maghrib;
+                  _curTimeShalat = listDatetime[0].times.maghrib;
+                } else if (_curTime >= _maghrib && _curTime < _isya) {
+                  _curShalat = Time.isya;
+                  _curTimeShalat = listDatetime[0].times.isha;
+                } else {
+                  _curShalat = Time.shubuh;
+                  _curTimeShalat = listDatetime[0].times.fajr;
+                }
+                _vTime = true;
+                if (_pageLoading) _getData();
+              }
+            });
+          } catch (e) {
+            debugPrint(e.toString());
+          }
+        });
   }
 
   Future _getData() async {
@@ -66,6 +126,8 @@ class _PageMainState extends State<PageMain> {
         Placemark place = daftarPlace[0];
         setState(() {
           _curLocation = place.locality;
+          _curCity = place.subAdministrativeArea;
+          _getShalat();
         });
       }).catchError((e) {
         debugPrint('error e: $e');
@@ -88,90 +150,212 @@ class _PageMainState extends State<PageMain> {
             SliverOverlapAbsorber(
               handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context),
               sliver: SliverAppBar(
-                backgroundColor: Colors.green,
+                backgroundColor: Colors.blue,
                 pinned: true,
-                expandedHeight: 160,
+                expandedHeight: 260,
                 forceElevated: scrolling,
-                flexibleSpace: FlexibleSpaceBar(
-                  background: Container(
-                    padding:
-                        EdgeInsets.only(top: _appBarHeight + _statusBarHeight),
-                    color: Colors.red,
-                  ),
+                title: Text(
+                  _curLocation,
+                  style: TextStyle(color: Colors.white, fontSize: Size.size18),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
+                actions: [
+                  IconButton(
+                    icon: Icon(
+                      Icons.sync,
+                      color: Colors.white,
+                    ),
+                    onPressed: () {
+                      setState(() {
+                        _pageLoading = true;
+                        _getCurrenyLocation();
+                      });
+                    },
+                  ),
+                  IconButton(
+                    icon: Icon(
+                      Icons.settings,
+                      color: Colors.white,
+                    ),
+                    onPressed: () => showDialog(
+                        context: context, builder: (context) => CustomDialog()),
+                  ),
+                ],
+                flexibleSpace: FlexibleSpaceBar(
+                    background: Stack(
+                  children: [
+                    Container(
+                      decoration: BoxDecoration(color: Colors.black),
+                      foregroundDecoration: BoxDecoration(
+                        image: DecorationImage(
+                            image: AssetImage(BaseAsset.bgPicture),
+                            fit: BoxFit.cover),
+                      ),
+                    ),
+                    Container(
+                      width: double.infinity,
+                      padding: EdgeInsets.only(
+                          top: _appBarHeight + _statusBarHeight + Size.size24,
+                          left: Size.size16,
+                          right: Size.size16),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Text(
+                            _curTimeShalat,
+                            style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 56,
+                                fontWeight: FontWeight.bold),
+                          ),
+                          Visibility(
+                            visible: _vTime,
+                            child: Text(
+                              'Menuju $_curShalat',
+                              style: TextStyle(color: Colors.white),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Positioned(
+                        bottom: Size.size16,
+                        left: Size.size16,
+                        right: Size.size16,
+                        child: Row(
+                          children: [
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Hari ini',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: Size.size12,
+                                  ),
+                                ),
+                                Text(
+                                  Func.getTime(Format.time_2),
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: Size.size12,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            Spacer(),
+                            InkWell(
+                              onTap: () => Navigator.of(context).push(
+                                  MaterialPageRoute(
+                                      builder: (_) => PageShalat(
+                                          location: _curLocation,
+                                          latitude: _latitude,
+                                          longitude: _longitude))),
+                              child: Container(
+                                padding: EdgeInsets.all(Size.size8),
+                                decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    borderRadius: BorderRadius.all(
+                                        Radius.circular(Size.size8))),
+                                child: Row(
+                                  children: [
+                                    Text(
+                                      'Detail',
+                                      style: TextStyle(
+                                          color: Colors.black,
+                                          fontSize: Size.size12),
+                                    ),
+                                    Container(
+                                        margin: EdgeInsets.only(left: 4),
+                                        child: Icon(
+                                          Icons.arrow_forward_ios,
+                                          color: Colors.grey[700],
+                                          size: Size.size12,
+                                        ))
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ],
+                        ))
+                  ],
+                )),
               ),
             ),
           ];
         },
-        body: Container(
-          margin: EdgeInsets.only(top: _appBarHeight),
-          child: Stack(
-            children: [
-              Center(
-                child: Visibility(
-                  visible: _pageLoading,
-                  child: JumpingDotsProgressIndicator(
-                    fontSize: Size.size40,
-                    color: Colors.blue,
-                  ),
+        body: Stack(
+          children: [
+            Center(
+              child: Visibility(
+                visible: _pageLoading,
+                child: JumpingDotsProgressIndicator(
+                  fontSize: Size.size40,
+                  color: Colors.blue,
                 ),
               ),
-              SmartRefresher(
-                controller: _refreshCon,
-                enablePullUp: true,
-                onRefresh: _getData,
+            ),
+            Container(
+              margin: EdgeInsets.only(top: _appBarHeight),
+              child: ScrollConfiguration(
+                behavior: RemoveGlow(),
                 child: ListView.builder(
+                  physics: BouncingScrollPhysics(),
                   itemCount: listHasil.length,
                   itemBuilder: (context, index) => itemSurat(listHasil, index),
                 ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       )),
     );
   }
 
   Widget itemSurat(List<Hasil> listHasil, int index) {
-    return InkWell(
-      onTap: () {
-        Navigator.of(context).push(MaterialPageRoute(builder: (_) {
-          Map<String, dynamic> data = {
-            Data.suratID: (index + 1).toString(),
-            Data.totalAyat: listHasil[index].ayat,
-            Data.suratNama: listHasil[index].nama
-          };
-          return PageAyat(data: data);
-        }));
-      },
-      child: Container(
-        margin: EdgeInsets.all(Size.size16),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: [
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                styleText(listHasil[index].nama, Size.size16, Colors.black,
-                    FontWeight.normal, 1, null),
-                styleText(
-                    listHasil[index].arti +
-                        ' | ' +
-                        listHasil[index].ayat +
-                        ' ayat',
-                    Size.size12,
-                    Colors.grey,
-                    FontWeight.normal,
-                    2,
-                    null),
-              ],
-            ),
-            Spacer(),
-            Container(
-              height: Size.size40,
-              child: Image.asset(BaseAsset.imagesSurat[index]),
-            )
-          ],
+    return Container(
+      color: (index % 2 == 0) ? Colors.white : Colors.indigoAccent[50],
+      child: InkWell(
+        onTap: () {
+          Navigator.of(context).push(MaterialPageRoute(builder: (_) {
+            Map<String, dynamic> data = {
+              Data.suratID: (index + 1).toString(),
+              Data.totalAyat: listHasil[index].ayat,
+              Data.suratNama: listHasil[index].nama
+            };
+            return PageAyat(data: data);
+          }));
+        },
+        child: Container(
+          margin: EdgeInsets.all(Size.size16),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  styleText(listHasil[index].nama, Size.size16, Colors.black,
+                      FontWeight.normal, 1, null),
+                  styleText(
+                      listHasil[index].arti +
+                          ' | ' +
+                          listHasil[index].ayat +
+                          ' ayat',
+                      Size.size12,
+                      Colors.grey,
+                      FontWeight.normal,
+                      2,
+                      null),
+                ],
+              ),
+              Spacer(),
+              Container(
+                height: Size.size40,
+                child: Image.asset(BaseAsset.imagesSurat[index]),
+              )
+            ],
+          ),
         ),
       ),
     );

@@ -114,25 +114,25 @@ class Times {
     });
 
     String imsak;
-    Midnight sunrise;
+    String sunrise;
     String fajr;
     String dhuhr;
     String asr;
-    Midnight sunset;
-    Maghrib maghrib;
+    String sunset;
+    String maghrib;
     String isha;
-    Midnight midnight;
+    String midnight;
 
     factory Times.fromJson(Map<String, dynamic> json) => Times(
         imsak: json["Imsak"],
-        sunrise: midnightValues.map[json["Sunrise"]],
+        sunrise: json["Sunrise"],
         fajr: json["Fajr"],
         dhuhr: json["Dhuhr"],
         asr: json["Asr"],
-        sunset: midnightValues.map[json["Sunset"]],
-        maghrib: maghribValues.map[json["Maghrib"]],
+        sunset: json["Sunset"],
+        maghrib:json["Maghrib"],
         isha: json["Isha"],
-        midnight: midnightValues.map[json["Midnight"]],
+        midnight:json["Midnight"],
     );
 
     Map<String, dynamic> toJson() => {
@@ -177,11 +177,11 @@ class Location {
 
     double latitude;
     double longitude;
-    int elevation;
+    double elevation;
     String country;
     String countryCode;
     String timezone;
-    int localOffset;
+    double localOffset;
 
     factory Location.fromJson(Map<String, dynamic> json) => Location(
         latitude: json["latitude"].toDouble(),
@@ -218,8 +218,8 @@ class Settings {
     String school;
     String juristic;
     String highlat;
-    int fajrAngle;
-    int ishaAngle;
+    double fajrAngle;
+    double ishaAngle;
 
     factory Settings.fromJson(Map<String, dynamic> json) => Settings(
         timeformat: json["timeformat"],

@@ -1,4 +1,7 @@
 class BaseAsset {
+  static String bgPicture = 'asset/pic/bg_picture.png';
+  static String ppProfil = 'asset/pic/pp_profil.jpg';
+
   static List<String> imagesSurat = [
     'asset/surat/sname_1.png',
     'asset/surat/sname_2.png',
@@ -113,5 +116,6 @@ class BaseAsset {
     'asset/surat/sname_111.png',
     'asset/surat/sname_112.png',
     'asset/surat/sname_113.png',
-    'asset/surat/sname_114.png'];
+    'asset/surat/sname_114.png'
+  ];
 }

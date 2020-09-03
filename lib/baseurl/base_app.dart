@@ -20,8 +20,18 @@ class Data {
   static String suratNama = 'nama';
 }
 
+class Time {
+  static String shubuh = 'Shubuh';
+  static String dhuhur = 'Dhuhur';
+  static String ashar = 'Ashar';
+  static String maghrib = 'Maghrib';
+  static String isya = 'Isya';
+}
+
 class Format {
   static String time_1 = 'dd MMM yyyy';
+  static String time_2 = 'dd MMMM yyyy';
+  static String time_3 = 'HH:mm';
 }
 
 class Func {
@@ -31,12 +41,13 @@ class Func {
   }
 
   static String getTime(var format) {
-    // var date = DateTime.now().toString();
-    // var dateParse = DateTime.parse(date);
-    // var data = dateParse.day.toString()+'-'+dateParse.month.toString()+'-'+dateParse.year.toString();
-    // return data;
     var date = DateTime.now();
     var f = DateFormat(format);
     return f.format(date);
+  }
+
+  static int timeToInt(String time) {
+    List<String> listData = time.split(':');
+    return (int.parse(listData[0]) * 60) + int.parse(listData[1]);
   }
 }
