@@ -1,7 +1,3 @@
-// To parse this JSON data, do
-//
-//     final responseShalat = responseShalatFromJson(jsonString);
-
 import 'dart:convert';
 
 ResponseShalat responseShalatFromJson(String str) => ResponseShalat.fromJson(json.decode(str));
@@ -84,19 +80,21 @@ class Date {
     });
 
     int timestamp;
-    DateTime gregorian;
-    DateTime hijri;
+    String gregorian;
+    String hijri;
 
     factory Date.fromJson(Map<String, dynamic> json) => Date(
         timestamp: json["timestamp"],
-        gregorian: DateTime.parse(json["gregorian"]),
-        hijri: DateTime.parse(json["hijri"]),
+        gregorian: json["gregorian"],
+        hijri: json["hijri"],
     );
 
     Map<String, dynamic> toJson() => {
         "timestamp": timestamp,
-        "gregorian": "${gregorian.year.toString().padLeft(4, '0')}-${gregorian.month.toString().padLeft(2, '0')}-${gregorian.day.toString().padLeft(2, '0')}",
-        "hijri": "${hijri.year.toString().padLeft(4, '0')}-${hijri.month.toString().padLeft(2, '0')}-${hijri.day.toString().padLeft(2, '0')}",
+        "gregorian": gregorian,
+        "hijri": hijri,
+        // "gregorian": "${gregorian.year.toString().padLeft(4, '0')}-${gregorian.month.toString().padLeft(2, '0')}-${gregorian.day.toString().padLeft(2, '0')}",
+        // "hijri": "${hijri.year.toString().padLeft(4, '0')}-${hijri.month.toString().padLeft(2, '0')}-${hijri.day.toString().padLeft(2, '0')}",
     };
 }
 

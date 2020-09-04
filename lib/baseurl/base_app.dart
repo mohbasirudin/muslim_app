@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:intl/intl.dart';
 
 class Size {
+  static double size4 = 4.0;
   static double size8 = 8.0;
   static double size12 = 12.0;
   static double size14 = 14.0;
@@ -12,6 +13,19 @@ class Size {
   static double size32 = 32.0;
   static double size40 = 40.0;
   static double size64 = 64.0;
+}
+
+class Profil {
+  static String nama = 'Moh. Basirudin';
+  static String desc = 'Ini adalah media saya untuk belajar. Silahkan kalau mau dikembangkan lagi agar bisa lebih baik dan lebih menarik. Silahkan untuk download file projeknya di Github. Terima kasih :)';
+  static String instagram ='Instagram';
+  static String whatsapp ='Whatsapp';
+  static String facebook ='Facebook';
+  static String github ='Github';
+  static String urlInstagram ='https://www.instagram.com/basirudin_/';
+  static String urlWhatsapp ='https://wa.me/6282332581431';
+  static String urlFacebook ='https://www.facebook.com/Moh.Basirudin.06';
+  static String urlGithub ='https://github.com/mohbasirudin/muslim_app';
 }
 
 class Data {

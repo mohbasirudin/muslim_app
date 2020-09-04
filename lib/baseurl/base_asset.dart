@@ -1,6 +1,10 @@
 class BaseAsset {
   static String bgPicture = 'asset/pic/bg_picture.png';
   static String ppProfil = 'asset/pic/pp_profil.jpg';
+  static String instagram = 'asset/pic/instagram.png';
+  static String whatsapp = 'asset/pic/whatsapp.png';
+  static String facebook = 'asset/pic/facebook.png';
+  static String github = 'asset/pic/github.png';
 
   static List<String> imagesSurat = [
     'asset/surat/sname_1.png',

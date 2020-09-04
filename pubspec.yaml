@@ -34,6 +34,7 @@ dependencies:
   geolocator: ^5.2.1
   font_awesome_flutter: ^8.8.1
   intl: ^0.16.1
+  url_launcher: ^5.5.2
 
 dev_dependencies:
   flutter_test:
@@ -55,6 +56,10 @@ flutter:
   # image png
     - asset/pic/bg_picture.png
     - asset/pic/pp_profil.jpg
+    - asset/pic/instagram.png
+    - asset/pic/facebook.png
+    - asset/pic/whatsapp.png
+    - asset/pic/github.png
   # image surat
     - asset/surat/sname_1.png
     - asset/surat/sname_2.png

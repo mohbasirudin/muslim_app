@@ -9,7 +9,7 @@ import 'package:quran/helper/remove_glow.dart';
 import 'package:quran/model/quran/response_surat.dart';
 import 'package:quran/baseurl/base_app.dart';
 import 'package:quran/model/shalat/response_shalat.dart' as shalat;
-import 'package:quran/view/other/custom_dialog.dart';
+import 'package:quran/view/other/dialog_profil.dart';
 import 'package:quran/view/quran/paget_ayat.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:quran/view/shalat/page_shalat.dart';
@@ -26,7 +26,7 @@ class _PageMainState extends State<PageMain> {
       _latitude = '',
       _longitude = '',
       _curShalat = '',
-      _curTimeShalat = '00:00',
+      _curTimeShalat = '--:--',
       _curCity = '';
   var _appBarHeight = 0.0, _statusBarHeight = 0.0;
   var _shubuh = 0,
@@ -179,7 +179,7 @@ class _PageMainState extends State<PageMain> {
                       color: Colors.white,
                     ),
                     onPressed: () => showDialog(
-                        context: context, builder: (context) => CustomDialog()),
+                        context: context, builder: (context) => DialogProfil()),
                   ),
                 ],
                 flexibleSpace: FlexibleSpaceBar(
