@@ -1,6 +1,7 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:quran/baseurl/base_app.dart';
 import 'package:quran/baseurl/base_asset.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -90,10 +91,25 @@ class DialogProfil extends StatelessWidget {
                         Profil.urlFacebook),
                     _itemSosmed(
                         BaseAsset.github, Profil.github, Profil.urlGithub),
+                    Container(
+                      margin: EdgeInsets.symmetric(
+                          vertical: Size.size12, horizontal: Size.size16),
+                      width: double.infinity,
+                      child: FlatButton(
+                        color: Colors.red,
+                        onPressed: () =>
+                            Navigator.of(context, rootNavigator: true).pop(),
+                        child: Text('Tutup',
+                            style: TextStyle(
+                              fontSize: Size.size16,
+                              color: Colors.white,
+                            )),
+                      ),
+                    )
                   ],
                 ),
               ),
-            )
+            ),
           ],
         ));
   }

@@ -10,7 +10,7 @@ class PageSplash extends StatelessWidget {
   Widget build(BuildContext context) {
     startApp(context);
     return Scaffold(
-      backgroundColor: Colors.blue,
+      backgroundColor: Colors.teal,
       body: Stack(
         children: [
           Align(

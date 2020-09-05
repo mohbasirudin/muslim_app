@@ -1,6 +1,10 @@
 import 'dart:convert';
 import 'package:intl/intl.dart';
 
+class Status {
+  static bool debug = false;
+}
+
 class Size {
   static double size4 = 4.0;
   static double size8 = 8.0;
@@ -17,15 +21,16 @@ class Size {
 
 class Profil {
   static String nama = 'Moh. Basirudin';
-  static String desc = 'Ini adalah media saya untuk belajar. Silahkan kalau mau dikembangkan lagi agar bisa lebih baik dan lebih menarik. Silahkan untuk download file projeknya di Github. Terima kasih :)';
-  static String instagram ='Instagram';
-  static String whatsapp ='Whatsapp';
-  static String facebook ='Facebook';
-  static String github ='Github';
-  static String urlInstagram ='https://www.instagram.com/basirudin_/';
-  static String urlWhatsapp ='https://wa.me/6282332581431';
-  static String urlFacebook ='https://www.facebook.com/Moh.Basirudin.06';
-  static String urlGithub ='https://github.com/mohbasirudin/muslim_app';
+  static String desc =
+      'Ini adalah media saya untuk belajar. Silahkan kalau mau dikembangkan lagi agar bisa lebih baik dan lebih menarik. Silahkan untuk download file projeknya di Github. Terima kasih :)';
+  static String instagram = 'Instagram';
+  static String whatsapp = 'Whatsapp';
+  static String facebook = 'Facebook';
+  static String github = 'Github';
+  static String urlInstagram = 'https://www.instagram.com/basirudin_/';
+  static String urlWhatsapp = 'https://wa.me/6282332581431';
+  static String urlFacebook = 'https://www.facebook.com/Moh.Basirudin.06';
+  static String urlGithub = 'https://github.com/mohbasirudin/muslim_app';
 }
 
 class Data {
@@ -46,6 +51,7 @@ class Format {
   static String time_1 = 'dd MMM yyyy';
   static String time_2 = 'dd MMMM yyyy';
   static String time_3 = 'HH:mm';
+  static String time_4 = 'yyyy-MM-dd';
 }
 
 class Func {

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:progress_indicators/progress_indicators.dart';
 import 'package:quran/api/api_service.dart';
 import 'package:quran/api/api_url.dart';
 import 'package:quran/baseurl/base_app.dart';
@@ -20,9 +21,24 @@ class PageShalat extends StatefulWidget {
 }
 
 class _PageShalatState extends State<PageShalat> {
-  var _location = '', _latitude = '', _longitude = '', _urlJadwalShalat = '';
+  var _location = '',
+      _latitude = '',
+      _longitude = '',
+      _urlJadwalShalat = '',
+      _today = '--:--',
+      _shubuh = '--:--',
+      _dhuhur = '--:--',
+      _ashar = '--:--',
+      _maghrib = '--:--',
+      _isya = '--:--',
+      _statusShubuh = false,
+      _statusDhuhur = false,
+      _statusAshar = false,
+      _statusMaghrib = false,
+      _statusIsya = false;
   List<shalat.Datetime> _listDatetime = List();
   var _statusBarHeight = 0.0, _appBarHeight = 0.0;
+  var _pageLoading = true;
   @override
   void initState() {
     _location = widget.location;
@@ -64,19 +80,47 @@ class _PageShalatState extends State<PageShalat> {
   Future _getData() async {
     await ApiUrl.jadwalShalat(ApiUrl.methodMonth, _latitude, _longitude)
         .then((value) => _urlJadwalShalat = value);
-    debugPrint('pageShalat: $_urlJadwalShalat');
     ApiService().get(
         url: _urlJadwalShalat,
         headers: {},
         callback: (status, message, response) {
-          // debugPrint('pageShalat: $status, $message, r: $response');
           setState(() {
             if (_listDatetime.isNotEmpty) _listDatetime.clear();
             if (status) {
               shalat.ResponseShalat resShalat =
                   shalat.ResponseShalat.fromJson(response);
               _listDatetime = resShalat.results.datetime;
+
+              for (var i = 0; i < _listDatetime.length; i++)
+                if (_listDatetime[i].date.gregorian == _today) {
+                  setState(() {
+                    _shubuh = _listDatetime[i].times.fajr;
+                    _dhuhur = _listDatetime[i].times.dhuhr;
+                    _ashar = _listDatetime[i].times.asr;
+                    _maghrib = _listDatetime[i].times.maghrib;
+                    _isya = _listDatetime[i].times.isha;
+
+                    var _curTime = Func.timeToInt(Func.getTime(Format.time_3));
+                    var _iShubuh = Func.timeToInt(_shubuh);
+                    var _iDhuhur = Func.timeToInt(_dhuhur);
+                    var _iAshar = Func.timeToInt(_ashar);
+                    var _iMaghrib = Func.timeToInt(_maghrib);
+                    var _iIsya = Func.timeToInt(_isya);
+
+                    if (_curTime >= _iShubuh && _curTime < _iDhuhur)
+                      _statusDhuhur = true;
+                    else if (_curTime >= _iDhuhur && _curTime < _iAshar)
+                      _statusAshar = true;
+                    else if (_curTime >= _iAshar && _curTime < _iMaghrib)
+                      _statusMaghrib = true;
+                    else if (_curTime >= _iMaghrib && _curTime < _iIsya)
+                      _statusIsya = true;
+                    else
+                      _statusShubuh = true;
+                  });
+                }
             }
+            _pageLoading = false;
           });
           return;
         });
@@ -86,8 +130,10 @@ class _PageShalatState extends State<PageShalat> {
   Widget build(BuildContext context) {
     _statusBarHeight = MediaQuery.of(context).padding.top;
     _appBarHeight = AppBar().preferredSize.height;
+    _today = Func.getTime(Format.time_4);
 
     return MaterialApp(
+      debugShowCheckedModeBanner: Status.debug,
         color: Colors.white,
         home: Scaffold(
             body: NestedScrollView(
@@ -97,7 +143,7 @@ class _PageShalatState extends State<PageShalat> {
                 handle:
                     NestedScrollView.sliverOverlapAbsorberHandleFor(context),
                 sliver: SliverAppBar(
-                  backgroundColor: Colors.green,
+                  backgroundColor: Colors.teal,
                   pinned: true,
                   leading: IconButton(
                       icon: Icon(
@@ -106,7 +152,7 @@ class _PageShalatState extends State<PageShalat> {
                       ),
                       onPressed: () => Navigator.of(context).pushReplacement(
                           MaterialPageRoute(builder: (_) => PageMain()))),
-                  expandedHeight: 160,
+                  expandedHeight: 220,
                   forceElevated: scrolling,
                   title: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -127,28 +173,25 @@ class _PageShalatState extends State<PageShalat> {
                           Icons.sync,
                           color: Colors.white,
                         ),
-                        onPressed: () => _getCurrenyLocation()),
+                        onPressed: () {
+                          _pageLoading = true;
+                          _getCurrenyLocation();
+                        }),
                   ],
                   flexibleSpace: FlexibleSpaceBar(
                       background: Container(
                     padding: EdgeInsets.only(
-                        top: _statusBarHeight + _appBarHeight + 16,
-                        left: 16,
-                        right: 16),
-                    color: Colors.teal,
+                        top: _statusBarHeight + _appBarHeight + Size.size16,
+                        left: Size.size16,
+                        right: Size.size16),
+                    color: Colors.teal[700],
                     child: Column(
                       children: [
-                        Row(
-                          children: [
-                            Text('Shubuh',
-                                style: TextStyle(
-                                    color: Colors.white, fontSize: 16)),
-                            Spacer(),
-                            Text('Shubuh',
-                                style: TextStyle(
-                                    color: Colors.white, fontSize: 16)),
-                          ],
-                        )
+                        _itemToday(Time.shubuh, _shubuh, _statusShubuh),
+                        _itemToday(Time.dhuhur, _dhuhur, _statusDhuhur),
+                        _itemToday(Time.ashar, _ashar, _statusAshar),
+                        _itemToday(Time.maghrib, _maghrib, _statusMaghrib),
+                        _itemToday(Time.isya, _isya, _statusIsya),
                       ],
                     ),
                   )),
@@ -156,16 +199,29 @@ class _PageShalatState extends State<PageShalat> {
               )
             ];
           },
-          body: Container(
-            margin: EdgeInsets.only(top: _appBarHeight),
-            child: ScrollConfiguration(
-              behavior: RemoveGlow(),
-              child: ListView.builder(
-                  physics: BouncingScrollPhysics(),
-                  itemCount: _listDatetime.length,
-                  itemBuilder: (context, index) =>
-                      _itemShalat(_listDatetime, index)),
-            ),
+          body: Stack(
+            children: [
+              Container(
+                margin: EdgeInsets.only(top: _appBarHeight),
+                child: ScrollConfiguration(
+                  behavior: RemoveGlow(),
+                  child: ListView.builder(
+                      physics: BouncingScrollPhysics(),
+                      itemCount: _listDatetime.length,
+                      itemBuilder: (context, index) =>
+                          _itemShalat(_listDatetime, index)),
+                ),
+              ),
+              Center(
+                child: Visibility(
+                  visible: _pageLoading,
+                  child: JumpingDotsProgressIndicator(
+                    fontSize: Size.size40,
+                    color: Colors.teal,
+                  ),
+                ),
+              ),
+            ],
           ),
         )));
   }
@@ -184,13 +240,41 @@ class _PageShalatState extends State<PageShalat> {
             margin: EdgeInsets.symmetric(
                 vertical: Size.size8, horizontal: Size.size4),
             child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Container(
-                  margin: EdgeInsets.symmetric(vertical: Size.size8),
-                  child: Text(
-                    _listDatetime[0].date.gregorian,
-                    style:
-                        TextStyle(fontSize: Size.size14, color: Colors.black),
+                  margin: EdgeInsets.symmetric(
+                      vertical: Size.size8, horizontal: Size.size16),
+                  child: Row(
+                    children: [
+                      Text(
+                        _listDatetime[index].date.gregorian,
+                        style: TextStyle(
+                            fontSize: Size.size14,
+                            color:
+                                (_listDatetime[index].date.gregorian == _today)
+                                    ? Colors.teal
+                                    : Colors.black),
+                      ),
+                      Spacer(),
+                      Visibility(
+                        visible: (_listDatetime[index].date.gregorian == _today)
+                            ? true
+                            : false,
+                        child: Text(
+                          'Hari ini',
+                          style: TextStyle(
+                              fontSize: Size.size14, color: Colors.teal),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Container(
+                  margin: EdgeInsets.only(bottom: Size.size8),
+                  child: Divider(
+                    height: 1,
+                    color: Colors.grey[500],
                   ),
                 ),
                 Row(
@@ -230,6 +314,33 @@ class _PageShalatState extends State<PageShalat> {
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  _itemToday(var shalat, var time, var status) {
+    return Container(
+      margin: EdgeInsets.symmetric(vertical: Size.size4),
+      child: Row(
+        children: [
+          Container(
+            margin: EdgeInsets.only(right: Size.size16),
+            child: Icon(
+              Icons.access_time,
+              color: (status) ? Colors.white : Colors.white70,
+              size: Size.size16,
+            ),
+          ),
+          Text(shalat,
+              style: TextStyle(
+                  color: (status) ? Colors.white : Colors.white70,
+                  fontSize: Size.size16)),
+          Spacer(),
+          Text(time,
+              style: TextStyle(
+                  color: (status) ? Colors.white : Colors.white70,
+                  fontSize: Size.size16)),
+        ],
       ),
     );
   }

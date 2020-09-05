@@ -4,7 +4,7 @@
     <!-- <item android:drawable="@android:color/white" /> -->
     <item>
         <shape>
-            <solid android:color="#2196F3"/>
+            <solid android:color="#009688"/>
         </shape>
     </item>
 

@@ -143,6 +143,8 @@ class _PageMainState extends State<PageMain> {
     _appBarHeight = AppBar().preferredSize.height;
 
     return MaterialApp(
+      color: Colors.white,
+      debugShowCheckedModeBanner: Status.debug,
       home: Scaffold(
           body: NestedScrollView(
         headerSliverBuilder: (context, scrolling) {
@@ -150,7 +152,7 @@ class _PageMainState extends State<PageMain> {
             SliverOverlapAbsorber(
               handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context),
               sliver: SliverAppBar(
-                backgroundColor: Colors.blue,
+                backgroundColor: Colors.teal,
                 pinned: true,
                 expandedHeight: 260,
                 forceElevated: scrolling,
@@ -175,7 +177,7 @@ class _PageMainState extends State<PageMain> {
                   ),
                   IconButton(
                     icon: Icon(
-                      Icons.settings,
+                      Icons.account_circle,
                       color: Colors.white,
                     ),
                     onPressed: () => showDialog(
@@ -188,6 +190,7 @@ class _PageMainState extends State<PageMain> {
                     Container(
                       decoration: BoxDecoration(color: Colors.black),
                       foregroundDecoration: BoxDecoration(
+                        color: Colors.white,
                         image: DecorationImage(
                             image: AssetImage(BaseAsset.bgPicture),
                             fit: BoxFit.cover),
@@ -229,7 +232,7 @@ class _PageMainState extends State<PageMain> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  'Hari ini',
+                                  _curCity,
                                   style: TextStyle(
                                     color: Colors.white,
                                     fontSize: Size.size12,
@@ -287,16 +290,8 @@ class _PageMainState extends State<PageMain> {
         },
         body: Stack(
           children: [
-            Center(
-              child: Visibility(
-                visible: _pageLoading,
-                child: JumpingDotsProgressIndicator(
-                  fontSize: Size.size40,
-                  color: Colors.blue,
-                ),
-              ),
-            ),
             Container(
+              color: Colors.white,
               margin: EdgeInsets.only(top: _appBarHeight),
               child: ScrollConfiguration(
                 behavior: RemoveGlow(),
@@ -304,6 +299,15 @@ class _PageMainState extends State<PageMain> {
                   physics: BouncingScrollPhysics(),
                   itemCount: listHasil.length,
                   itemBuilder: (context, index) => itemSurat(listHasil, index),
+                ),
+              ),
+            ),
+            Center(
+              child: Visibility(
+                visible: _pageLoading,
+                child: JumpingDotsProgressIndicator(
+                  fontSize: Size.size40,
+                  color: Colors.teal,
                 ),
               ),
             ),

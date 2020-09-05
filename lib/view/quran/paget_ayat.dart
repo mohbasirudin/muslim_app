@@ -25,7 +25,7 @@ class _PageAyatState extends State<PageAyat> {
   var _data;
   var _url = '', _totalAyat = '', _suratNama = '';
   var _ayatStart = 1, _ayatEnd = 10;
-  var _isLoading = false, _pageLoading = true;
+  var _isLoading = false, _pageLoading = true, _reloadData = false;
   List<Ar> _listArab = new List(), _listIndo = new List();
 
   @override
@@ -33,17 +33,18 @@ class _PageAyatState extends State<PageAyat> {
     _data = widget.data;
     _totalAyat = _data[BaseApp.Data.totalAyat];
     _suratNama = _data[BaseApp.Data.suratNama];
-    getData();
+    _getData();
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      debugShowCheckedModeBanner: Status.debug,
       home: Scaffold(
         backgroundColor: Colors.white,
         appBar: AppBar(
-          backgroundColor: Colors.blue,
+          backgroundColor: Colors.teal,
           title: Text(
             _suratNama,
             style: TextStyle(fontSize: Size.size16, color: Colors.white),
@@ -55,20 +56,34 @@ class _PageAyatState extends State<PageAyat> {
               ),
               onPressed: () => Navigator.of(context).pushReplacement(
                   MaterialPageRoute(builder: (_) => PageMain()))),
+          actions: [
+            IconButton(
+                icon: Icon(
+                  Icons.sync,
+                  color: Colors.white,
+                ),
+                onPressed: () {
+                  setState(() {
+                    _reloadData = true;
+                    _getData();
+                  });
+                })
+          ],
         ),
         body: Stack(
           children: [
-            Center(
-              child: Visibility(
-                visible: _pageLoading,
-                child: JumpingDotsProgressIndicator(
-                  fontSize: Size.size40,
-                  color: Colors.blue,
-                ),
-              ),
-            ),
             Column(
               children: <Widget>[
+                Visibility(
+                  visible: _reloadData,
+                  child: Container(
+                    margin: EdgeInsets.only(bottom: Size.size16),
+                    child: JumpingDotsProgressIndicator(
+                      fontSize: Size.size32,
+                      color: Colors.teal,
+                    ),
+                  ),
+                ),
                 Expanded(
                   child: NotificationListener<ScrollNotification>(
                     onNotification: (ScrollNotification scrollNotification) {
@@ -76,11 +91,10 @@ class _PageAyatState extends State<PageAyat> {
                           scrollNotification.metrics.pixels ==
                               scrollNotification.metrics.maxScrollExtent) {
                         if (_listArab.length < int.parse(_totalAyat)) {
-                          getData();
+                          debugPrint('load');
+                          _getData();
                           setState(() {
                             _isLoading = true;
-                            _ayatStart = _ayatEnd + 1;
-                            _ayatEnd = _ayatEnd + 10;
                           });
                         }
                       }
@@ -104,12 +118,21 @@ class _PageAyatState extends State<PageAyat> {
                     child: Center(
                       child: JumpingDotsProgressIndicator(
                         fontSize: Size.size40,
-                        color: Colors.blue,
+                        color: Colors.teal,
                       ),
                     ),
                   ),
-                )
+                ),
               ],
+            ),
+            Visibility(
+              visible: _pageLoading,
+              child: Center(
+                child: JumpingDotsProgressIndicator(
+                  fontSize: Size.size40,
+                  color: Colors.teal,
+                ),
+              ),
             ),
           ],
         ),
@@ -117,10 +140,9 @@ class _PageAyatState extends State<PageAyat> {
     );
   }
 
-  Future getData() async {
+  _getData() async {
     await ApiUrl.ayatRange(_data[BaseApp.Data.suratID], _ayatStart, _ayatEnd)
         .then((value) => _url = value);
-    debugPrint('$_ayatStart, $_ayatEnd');
 
     ApiService().get(
         url: _url,
@@ -131,43 +153,71 @@ class _PageAyatState extends State<PageAyat> {
                   ResponseAyat.fromJson(jsonDecode(json.encode(response)));
               _listArab.addAll(resAyat.ayat.data.ar);
               _listIndo.addAll(resAyat.ayat.data.id);
+              _ayatStart = _ayatEnd + 1;
+              _ayatEnd = _ayatEnd + 10;
               _isLoading = false;
               _pageLoading = false;
-            } else {
-              debugPrint('pageMain Gagal: $status, $message, $response');
+              _reloadData = false;
             }
           });
         });
   }
 
   Widget itemAyat(List<Ar> listArab, List<Ar> listIndo, var index) {
-    return InkWell(
-      hoverColor: Colors.blue,
-      onTap: () {
-        debugPrint('$index');
-      },
-      child: Ink(
-        color: (index % 2 == 1) ? Colors.white : Colors.grey[50],
-        child: Container(
-          margin: EdgeInsets.all(Size.size16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Text(
-                Func.convertUtf8(listArab[index].teks),
-                textAlign: TextAlign.right,
-                style: TextStyle(
-                  fontSize: Size.size16,
-                  color: Colors.blue,
+    return Container(
+      color: (index % 2 == 1) ? Colors.white : Colors.grey[50],
+      child: Container(
+        margin: EdgeInsets.only(
+          top: Size.size16,
+          right: Size.size16,
+          bottom: Size.size16,
+        ),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Container(
+              width: Size.size40,
+              height: Size.size32,
+              margin: EdgeInsets.only(right: Size.size16),
+              decoration: BoxDecoration(
+                  color: Colors.teal[200],
+                  borderRadius: BorderRadius.only(
+                      topRight: Radius.circular(8),
+                      bottomRight: Radius.circular(8))),
+              child: Center(
+                child: Text(
+                  (index + 1).toString(),
+                  style: TextStyle(color: Colors.white, fontSize: Size.size14),
                 ),
               ),
-              Text(
-                listIndo[index].teks,
-                textAlign: TextAlign.left,
-                style: TextStyle(fontSize: Size.size16, color: Colors.black),
+            ),
+            Flexible(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Container(
+                    child: Text(
+                      Func.convertUtf8(listArab[index].teks),
+                      textAlign: TextAlign.right,
+                      style: TextStyle(
+                          fontSize: Size.size18,
+                          color: Colors.black,
+                          fontWeight: FontWeight.normal),
+                    ),
+                  ),
+                  Container(
+                    margin: EdgeInsets.only(top: BaseApp.Size.size8),
+                    child: Text(
+                      listIndo[index].teks,
+                      textAlign: TextAlign.left,
+                      style: TextStyle(
+                          fontSize: Size.size14, color: Colors.teal[200]),
+                    ),
+                  ),
+                ],
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
