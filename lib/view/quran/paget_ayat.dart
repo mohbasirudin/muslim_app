@@ -15,7 +15,7 @@ import 'package:quran/view/page_main.dart';
 
 class PageAyat extends StatefulWidget {
   final Map<String, dynamic> data;
-  const PageAyat({Key key, this.data}) : super(key: key);
+  const PageAyat({required this.data});
 
   @override
   _PageAyatState createState() => _PageAyatState();
@@ -26,7 +26,7 @@ class _PageAyatState extends State<PageAyat> {
   var _url = '', _totalAyat = '', _suratNama = '';
   var _ayatStart = 1, _ayatEnd = 10;
   var _isLoading = false, _pageLoading = true, _reloadData = false;
-  List<Ar> _listArab = new List(), _listIndo = new List();
+  List<Ar> _listArab = [], _listIndo = [];
 
   @override
   void initState() {

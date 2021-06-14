@@ -10,11 +10,9 @@ import 'package:quran/view/page_main.dart';
 
 class PageShalat extends StatefulWidget {
   const PageShalat(
-      {Key key,
-      @required this.location,
-      @required this.latitude,
-      @required this.longitude})
-      : super(key: key);
+      {required this.location,
+      required this.latitude,
+      required this.longitude});
   final String location, latitude, longitude;
   @override
   _PageShalatState createState() => _PageShalatState();
@@ -36,7 +34,7 @@ class _PageShalatState extends State<PageShalat> {
       _statusAshar = false,
       _statusMaghrib = false,
       _statusIsya = false;
-  List<shalat.Datetime> _listDatetime = List();
+  List<shalat.Datetime> _listDatetime = [];
   var _statusBarHeight = 0.0, _appBarHeight = 0.0;
   var _pageLoading = true;
   @override
@@ -89,16 +87,16 @@ class _PageShalatState extends State<PageShalat> {
             if (status) {
               shalat.ResponseShalat resShalat =
                   shalat.ResponseShalat.fromJson(response);
-              _listDatetime = resShalat.results.datetime;
+              _listDatetime = resShalat.results!.datetime!;
 
               for (var i = 0; i < _listDatetime.length; i++)
-                if (_listDatetime[i].date.gregorian == _today) {
+                if (_listDatetime[i].date!.gregorian == _today) {
                   setState(() {
-                    _shubuh = _listDatetime[i].times.fajr;
-                    _dhuhur = _listDatetime[i].times.dhuhr;
-                    _ashar = _listDatetime[i].times.asr;
-                    _maghrib = _listDatetime[i].times.maghrib;
-                    _isya = _listDatetime[i].times.isha;
+                    _shubuh = _listDatetime[i].times!.fajr!;
+                    _dhuhur = _listDatetime[i].times!.dhuhr!;
+                    _ashar = _listDatetime[i].times!.asr!;
+                    _maghrib = _listDatetime[i].times!.maghrib!;
+                    _isya = _listDatetime[i].times!.isha!;
 
                     var _curTime = Func.timeToInt(Func.getTime(Format.time_3));
                     var _iShubuh = Func.timeToInt(_shubuh);
@@ -133,7 +131,7 @@ class _PageShalatState extends State<PageShalat> {
     _today = Func.getTime(Format.time_4);
 
     return MaterialApp(
-      debugShowCheckedModeBanner: Status.debug,
+        debugShowCheckedModeBanner: Status.debug,
         color: Colors.white,
         home: Scaffold(
             body: NestedScrollView(
@@ -248,19 +246,20 @@ class _PageShalatState extends State<PageShalat> {
                   child: Row(
                     children: [
                       Text(
-                        _listDatetime[index].date.gregorian,
+                        _listDatetime[index].date!.gregorian!,
                         style: TextStyle(
                             fontSize: Size.size14,
                             color:
-                                (_listDatetime[index].date.gregorian == _today)
+                                (_listDatetime[index].date!.gregorian == _today)
                                     ? Colors.teal
                                     : Colors.black),
                       ),
                       Spacer(),
                       Visibility(
-                        visible: (_listDatetime[index].date.gregorian == _today)
-                            ? true
-                            : false,
+                        visible:
+                            (_listDatetime[index].date!.gregorian == _today)
+                                ? true
+                                : false,
                         child: Text(
                           'Hari ini',
                           style: TextStyle(
@@ -279,11 +278,12 @@ class _PageShalatState extends State<PageShalat> {
                 ),
                 Row(
                   children: [
-                    _itemWaktu(Time.shubuh, listDatetime[index].times.fajr),
-                    _itemWaktu(Time.dhuhur, listDatetime[index].times.dhuhr),
-                    _itemWaktu(Time.ashar, listDatetime[index].times.asr),
-                    _itemWaktu(Time.maghrib, listDatetime[index].times.maghrib),
-                    _itemWaktu(Time.isya, listDatetime[index].times.isha),
+                    _itemWaktu(Time.shubuh, listDatetime[index].times!.fajr),
+                    _itemWaktu(Time.dhuhur, listDatetime[index].times!.dhuhr),
+                    _itemWaktu(Time.ashar, listDatetime[index].times!.asr),
+                    _itemWaktu(
+                        Time.maghrib, listDatetime[index].times!.maghrib),
+                    _itemWaktu(Time.isya, listDatetime[index].times!.isha),
                   ],
                 )
               ],

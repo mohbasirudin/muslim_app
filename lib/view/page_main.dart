@@ -37,7 +37,7 @@ class _PageMainState extends State<PageMain> {
       _curTime = 0;
 
   final ApiService _apiService = ApiService();
-  List<Hasil> listHasil = List();
+  List<Hasil> listHasil = [];
 
   @override
   void initState() {
@@ -59,29 +59,30 @@ class _PageMainState extends State<PageMain> {
               if (status) {
                 shalat.ResponseShalat resShalat =
                     shalat.ResponseShalat.fromJson(response);
-                List<shalat.Datetime> listDatetime = resShalat.results.datetime;
+                List<shalat.Datetime>? listDatetime =
+                    resShalat.results!.datetime;
                 _curTime = Func.timeToInt(Func.getTime(Format.time_3));
-                _shubuh = Func.timeToInt(listDatetime[0].times.fajr);
-                _dhuhur = Func.timeToInt(listDatetime[0].times.dhuhr);
-                _ashar = Func.timeToInt(listDatetime[0].times.asr);
-                _maghrib = Func.timeToInt(listDatetime[0].times.maghrib);
-                _isya = Func.timeToInt(listDatetime[0].times.isha);
+                _shubuh = Func.timeToInt(listDatetime![0].times!.fajr!);
+                _dhuhur = Func.timeToInt(listDatetime[0].times!.dhuhr!);
+                _ashar = Func.timeToInt(listDatetime[0].times!.asr!);
+                _maghrib = Func.timeToInt(listDatetime[0].times!.maghrib!);
+                _isya = Func.timeToInt(listDatetime[0].times!.isha!);
 
                 if (_curTime >= _shubuh && _curTime < _dhuhur) {
                   _curShalat = Time.dhuhur;
-                  _curTimeShalat = listDatetime[0].times.dhuhr;
+                  _curTimeShalat = listDatetime[0].times!.dhuhr!;
                 } else if (_curTime >= _dhuhur && _curTime < _ashar) {
                   _curShalat = Time.ashar;
-                  _curTimeShalat = listDatetime[0].times.asr;
+                  _curTimeShalat = listDatetime[0].times!.asr!;
                 } else if (_curTime >= _ashar && _curTime < _maghrib) {
                   _curShalat = Time.maghrib;
-                  _curTimeShalat = listDatetime[0].times.maghrib;
+                  _curTimeShalat = listDatetime[0].times!.maghrib!;
                 } else if (_curTime >= _maghrib && _curTime < _isya) {
                   _curShalat = Time.isya;
-                  _curTimeShalat = listDatetime[0].times.isha;
+                  _curTimeShalat = listDatetime[0].times!.isha!;
                 } else {
                   _curShalat = Time.shubuh;
-                  _curTimeShalat = listDatetime[0].times.fajr;
+                  _curTimeShalat = listDatetime[0].times!.fajr!;
                 }
                 _vTime = true;
                 if (_pageLoading) _getData();

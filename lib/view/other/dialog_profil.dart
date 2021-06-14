@@ -7,8 +7,6 @@ import 'package:quran/baseurl/base_asset.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class DialogProfil extends StatelessWidget {
-  const DialogProfil({Key key}) : super(key: key);
-
   @override
   Widget build(BuildContext context) {
     return Dialog(

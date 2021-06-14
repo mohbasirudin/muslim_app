@@ -1,15 +1,15 @@
 class ResponseSurat {
-  String status;
-  Query query;
-  List<Hasil> hasil;
+  late String status;
+  late Query? query;
+  late List<Hasil> hasil;
 
-  ResponseSurat({this.status, this.query, this.hasil});
+  ResponseSurat({required this.status, this.query, required this.hasil});
 
   ResponseSurat.fromJson(Map<String, dynamic> json) {
     status = json['status'];
     query = json['query'] != null ? new Query.fromJson(json['query']) : null;
     if (json['hasil'] != null) {
-      hasil = new List<Hasil>();
+      hasil = <Hasil>[];
       json['hasil'].forEach((v) {
         hasil.add(new Hasil.fromJson(v));
       });
@@ -20,7 +20,7 @@ class ResponseSurat {
     final Map<String, dynamic> data = new Map<String, dynamic>();
     data['status'] = this.status;
     if (this.query != null) {
-      data['query'] = this.query.toJson();
+      data['query'] = this.query!.toJson();
     }
     if (this.hasil != null) {
       data['hasil'] = this.hasil.map((v) => v.toJson()).toList();
@@ -30,9 +30,9 @@ class ResponseSurat {
 }
 
 class Query {
-  String format;
-  String surat;
-  Query({this.format, this.surat});
+  late String format;
+  late String surat;
+  Query({required this.format, required this.surat});
 
   Query.fromJson(Map<String, dynamic> json) {
     format = json['format'];
@@ -48,30 +48,30 @@ class Query {
 }
 
 class Hasil {
-  String nomor;
-  String nama;
-  String asma;
-  String name;
-  String start;
-  String ayat;
-  String type;
-  String urut;
-  String rukuk;
-  String arti;
-  String keterangan;
+  late String nomor;
+  late String nama;
+  late String asma;
+  late String name;
+  late String start;
+  late String ayat;
+  late String type;
+  late String urut;
+  late String rukuk;
+  late String arti;
+  late String keterangan;
 
   Hasil(
-      {this.nomor,
-      this.nama,
-      this.asma,
-      this.name,
-      this.start,
-      this.ayat,
-      this.type,
-      this.urut,
-      this.rukuk,
-      this.arti,
-      this.keterangan});
+      {required this.nomor,
+      required this.nama,
+      required this.asma,
+      required this.name,
+      required this.start,
+      required this.ayat,
+      required this.type,
+      required this.urut,
+      required this.rukuk,
+      required this.arti,
+      required this.keterangan});
 
   Hasil.fromJson(Map<String, dynamic> json) {
     nomor = json['nomor'];
